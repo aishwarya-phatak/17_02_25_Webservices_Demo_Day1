@@ -5,8 +5,7 @@
 //  Created by Vishal Jagtap on 03/04/25.
 //
 
-
-struct Comment : Decodable{
+struct Comment{
     var postId : Int
     var id : Int
     var name : String

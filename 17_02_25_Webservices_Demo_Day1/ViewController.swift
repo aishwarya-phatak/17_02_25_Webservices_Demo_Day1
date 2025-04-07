@@ -13,14 +13,26 @@ class ViewController: UIViewController {
     var urlRequest : URLRequest?
     var urlSession : URLSession?
     var comments : [Comment] = []
+    var commentTableViewCell : CommentTableViewCell?
+    private let reuseIdentifierForCommentTableViewCell = "CommentTableViewCell"
+    
+    @IBOutlet weak var commentsTableView: UITableView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         initSettings()
         jsonSerialization()
+        registerCellWithTableView()
+    }
+    
+    func registerCellWithTableView(){
+        let uiNib = UINib(nibName: reuseIdentifierForCommentTableViewCell, bundle: nil)
+        self.commentsTableView.register(uiNib, forCellReuseIdentifier: reuseIdentifierForCommentTableViewCell)
     }
     
     func initSettings(){
+        commentsTableView.delegate = self
+        commentsTableView.dataSource = self
         url = URL(string: Constants.urlString)
         urlRequest = URLRequest(url: url!)
         urlSession = URLSession(configuration: .default)
@@ -50,7 +62,34 @@ class ViewController: UIViewController {
                 
                 print("Swift Array of comments -- \(self.comments)")
             }
+            
+            DispatchQueue.main.async {
+                self.commentsTableView.reloadData()
+            }
         }
         dataTask?.resume()
+    }
+}
+
+extension ViewController : UITableViewDataSource{
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        comments.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        commentTableViewCell = self.commentsTableView.dequeueReusableCell(withIdentifier: reuseIdentifierForCommentTableViewCell, for: indexPath) as? CommentTableViewCell
+        
+        commentTableViewCell?.commentIdLabel.text = "\(comments[indexPath.row].id)"
+        commentTableViewCell?.commentEmailLabel.text = comments[indexPath.row].email
+        commentTableViewCell?.commentNameLabel.text = comments[indexPath.row].name
+        commentTableViewCell?.commentBodyLabel.text = comments[indexPath.row].body
+        
+        return commentTableViewCell ?? UITableViewCell()
+    }
+}
+
+extension ViewController : UITableViewDelegate{
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 165.0
     }
 }
